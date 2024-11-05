@@ -1,0 +1,388 @@
+---
+title: "WebScrapping de SolotodoCL"
+subtitle: "Tarea 1 para Analítica de Datos "
+author: "Matías Deneken"
+format: pdf
+editor: visual
+---
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+
+library(texreg)
+library(readr)
+library(tidyverse)
+library(scales)
+library(broom)
+library(dplyr)
+
+data <- read_csv("~/Dropbox/MACI-UDEC/analítica-datos/individual-work/bbdd/data.csv")
+```
+
+# Introducción[^1]
+
+[^1]: En la presente tarea se utillizó R y Python.
+
+El presente trabajo tiene como objetivo ayudar a una emprendedora a dar una pelea dura a las grandes empresas de telefonías móviles.
+
+Para ello, realizamos un análisis de webscrapping a SoloTodo, al igual que un análisis respectivo.
+
+El proceso de scrapping se dividide en 4 grandes códigos y , hacia al el final, una base de datos productos de ellos.
+
+Con el fin de transparentar el proceso de la tarea, los scripts se encuentran en el [Github personal de Matías Deneken](https://www.github.com/matdknu/scrapping-solo-todo).
+
+1.  El código de obtención de links [Encuentra aquí](https://github.com/matdknu/scrapping-solo-todo/blob/main/0-links.ipynb).
+2.  El scrapping hacia los links [Encuentra aquí](https://github.com/matdknu/scrapping-solo-todo/blob/main/01-scrapping.ipynb).
+
+**Comentario**: Se tuvo que realizar dos scrapping distintos por la sobrecarga que le estabamos realizando al computador.
+
+3.  El código de limpieza de datos [Encuentra aquí](https://github.com/matdknu/scrapping-solo-todo/blob/main/02-cleaning-data.R).
+
+**Comentario**: Para facilidad del estudiante, esto se realizó en R.
+
+4.  El código de los análisis se [Encuentra aquí](https://github.com/matdknu/scrapping-solo-todo/blob/main/03-data-viz.ipynb).
+5.  La base de datos se [encuentra aquí](https://github.com/matdknu/scrapping-solo-todo/blob/main/data.csv).
+
+La tarea en su conjunto se [encuentra aquí](www.hola.cl).
+
+## Resultados
+
+### Cargar paquetes.
+
+```{r}
+#| echo: true
+#| eval: false
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
+import pandas as pd
+import matplotlib.pyplot as plt
+data = pd.read_csv('bbdd/data_final.csv', sep=';')
+```
+
+### Obtención de bases de datos y relacion entre funciones.
+
+1)  **Que le genere una base de datos estructurada con información actualizada de la competencia que permita análisis interesantes. (10 ptos)**
+
+La base de datos fue constituidad a partir de un Webscrapping gracias al paquete `selenium`. .
+
+La base de datos está constituida por 229 valores únicos de teléfonos, es decir, la cantidad de celulares presentes en la base de datos. Sin embargo el total de casos de 581, lo que indica que diferentes tiendas pueden vender el mismo modelo de celular.
+
+La base de datos no se agota ahí, sino que en total son 28 que se encuentre en el siguiente listado.
+
+![](images/bbdd-datos.png){width="500"}
+
+Sin embargo, para la construcción de la base de datos se creó una variable que identifica si un celular se encuentra liberado. A partir de un filtro que contemple que está liberado, la cantidad de celulares se reduce a 205.
+
+```{r}
+#| echo: false
+data |> filter(liberado == "sí") |> 
+  select(equipo, liberado)
+```
+
+2)  **Y que averigüe alguna relación entre las funciones de un teléfono móvil (p. ej., RAM, memoria interna, etc.) y su precio de venta. (Luego de recopilar los datos de ventas de teléfonos móviles de varias empresas). (15 ptos)**
+
+Un análisis preliminar de la información sugiere una relación positiva, aunque débil, entre el precio de los teléfonos y la calidad de sus funciones. Por ejemplo, los dispositivos con baterías de mayor capacidad tienden a ubicarse hacia la derecha en el gráfico. Además, se observa que los sistemas operativos Android presentan, en promedio, mejor capacidad de batería en comparación con los sistemas iOS y MTK.
+
+La relación entre el precio y la calidad de la cámara sigue una tendencia similar. En general, una mejor cámara se asocia con un mayor precio del dispositivo. Aunque la relación es débil y muchos teléfonos se agrupan hacia el extremo derecho, es evidente que aquellos con características superiores tienden a estar ubicados en esta área del gráfico.
+
+En cuanto a la relación entre memoria y precio, se observa la misma tendencia. Una mayor capacidad de memoria está asociada a un precio más alto. Además, se aprecia que los dispositivos con sistema iOS se encuentran en posiciones intermedias dentro del rango de precios, mientras que los teléfonos con Android se distribuyen más hacia la izquierda. A pesar de esto, es notable que algunos dispositivos Android con memoria similar a los de iOS presentan precios más elevados.
+
+Finalmente, la relación entre precio y potencia también muestra una correlación positiva, aunque débil. Los teléfonos con iOS tienden a mostrar una menor potencia en comparación con algunos modelos Android. Sin embargo, como ha sugerido la empresa Apple, la potencia no siempre refleja la eficiencia del dispositivo. En este sentido, aunque los teléfonos Android suelen ofrecer mayor potencia, su eficiencia relativa en comparación con los dispositivos iOS no se puede determinar a partir de estos datos.
+
+Esto lo vemos en las siguientes imágenes:
+
++-----------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------------+
+| ![Relación Precio y Batería](images/precio_batería.png){fig-align="center" width="350"} | ![Relación Precio y Cámara](images/precio_camara.png){fig-align="center" width="350"}     |
++=========================================================================================+===========================================================================================+
+| ![Relación Precio y Memoria](images/precio_memoria.png){fig-align="center" width="350"} | ![Relación Precio y Potencia](images/precio_potencia.png){fig-align="center" width="350"} |
++-----------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------------+
+
+## Análisis de inferencial
+
+### Arbol de decisión
+
+Para el árbol de decisión utilizamos las mismas variables independientes de ram, precio, batería y camara. Mientras que dependientes fueron el precio.
+
+```{r}
+#| echo: true
+#| eval: false
+
+# Dividir los datos en conjuntos de entrenamiento y prueba
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+
+# Crear y entrenar el modelo de árbol de decisiones
+tree_model = DecisionTreeRegressor(max_depth=4, random_state=42)
+tree_model.fit(X_train, y_train)
+
+# Hacer predicciones y calcular el error
+y_pred = tree_model.predict(X_test)
+rmse = mean_squared_error(y_test, y_pred, squared=False)
+r2 = r2_score(y_test, y_pred)
+
+# Mostrar los resultados
+print(f"RMSE: {rmse}")
+print(f"R² Score: {r2}")
+```
+
+El árbol de decisiones muestra un modelo predictivo que estima el precio de dispositivos móviles utilizando atributos como memoria, batería, potencia y RAM. La estructura del árbol sigue un flujo de decisiones que, en cada nodo, evalúa una característica específica del dispositivo en comparación con un valor umbral. Dependiendo de si la condición es verdadera o falsa, el flujo sigue hacia la izquierda o la derecha, permitiendo un análisis secuencial basado en los valores específicos de cada característica.
+
+![](images/clipboard-472216031.png){width="456"}
+
+Cada división en el árbol está diseñada para minimizar el error en la predicción. Esto significa que, en cada nodo, se elige el valor de la característica que mejor separa los datos en cuanto a su relación con el precio. Por ejemplo, si la memoria es menor o igual a 384, el árbol sigue evaluando el valor de la batería; si la batería es menor o igual a 490,000, el árbol procede a verificar la potencia para afinar aún más la predicción.
+
+Los nodos representan las predicciones finales del precio. Cuando se llega a un nodo terminal, el modelo da un valor de precio basado en la combinación específica de características evaluadas en esa ruta. Por ejemplo, si la memoria es menor o igual a 384, la batería es menor o igual a 490,000 y la potencia es menor o igual a 15, el modelo predice un precio de 37,470. Para un dispositivo con batería superior a 490,000 y potencia mayor a 110, la predicción de precio es 810,754.80.
+
+Este modelo sugiere que la memoria y la potencia son factores especialmente significativos en la predicción de precios.
+
+![](images/clipboard-2430382665.png){width="222"}
+
+Se realizará un Random Forest para mayor precisión.
+
+### Random Forest
+
+Para hacer el modelo de Random Forest se utilizó como variable dependiente el Precio y como independiente memoria, potencia, batería y ram. Previamente se categorizó la variable precio según señalan las instrucciones.
+
+```{r}
+#| echo: true
+#| eval: false
+
+# Ajusta los límites de los precios de acuerdo a tu dataset
+data["precio_categoria"] = pd.cut(data["precio"], bins=[0, 100000, 300000, float("inf")], labels=["bajo", "medio", "alto"])
+
+# Separar las características (X) y la variable de destino (y)
+X = data[["bateria", "memoria", "potencia", "ram"]]
+y = data["precio_categoria"]
+
+# Dividir el dataset en conjuntos de entrenamiento y prueba
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+
+# Crear el modelo de Random Forest para clasificación
+rf_classifier = RandomForestClassifier(n_estimators=100, random_state=42)
+rf_classifier.fit(X_train, y_train)
+
+# Realizar predicciones
+y_pred = rf_classifier.predict(X_test)
+
+# Evaluar el modelo
+print("Accuracy:", accuracy_score(y_test, y_pred))
+print("\nClassification Report:\n", classification_report(y_test, y_pred))
+
+# Mostrar la matriz de confusión
+plt.figure(figsize=(8, 6))
+sns.heatmap(confusion_matrix(y_test, y_pred), annot=True, fmt="d", cmap="Blues", xticklabels=rf_classifier.classes_, yticklabels=rf_classifier.classes_)
+plt.xlabel("Predicted")
+plt.ylabel("True")
+plt.title("Confusion Matrix of Price Categories")
+plt.show()
+
+# Importancia de características
+importances = rf_classifier.feature_importances_
+feature_importance_df = pd.DataFrame({"feature": X.columns, "importance": importances}).sort_values(by="importance", ascending=False)
+```
+
+El análisis nos demuestra lo siguiente:
+
+![](images/clipboard-3040644545.png){width="352"}
+
+El modelo de Random Forest clasifica con un 89.66% de precisión general en tres categorías de precio: alto, bajo y medio. La clase "alto" tiene un rendimiento sobresaliente, con precisión y recall muy altos (1.00 y 0.95, respectivamente), lo que indica que el modelo identifica y clasifica correctamente casi todos los dispositivos de precio alto. La clase "medio" también presenta buen desempeño, con un recall de 1.00, lo que significa que el modelo encuentra todos los dispositivos de esta categoría, aunque con una precisión ligeramente menor (0.83). Sin embargo, la clase "bajo" muestra un recall bajo de 0.38, indicando que solo se identifican correctamente el 38% de los dispositivos de esta categoría, aunque su precisión es alta (1.00). En general, el modelo es confiable para clasificar dispositivos en las categorías "alto" y "medio", pero podría mejorarse para la categoría "bajo".
+
++--------------------------------------+--------------------------------------+
+| ![](images/clipboard-1363025529.png) | ![](images/clipboard-1456242799.png) |
++--------------------------------------+--------------------------------------+
+
+Estos resultados sugieren que la memoria es el factor más determinante en el precio de un dispositivo móvil, posiblemente debido a la percepción de que un mayor almacenamiento y rendimiento son características clave para los consumidores.
+
+### Regresión lineal.
+
+Este tipo de regresión es clave para identificar las características técnicas que más influyen en el precio de los dispositivos móviles.
+
+$precio_i = w_1 Batería + w_2 Memoria + w_3 Potencia +  w_4 Ram b$
+
+```{r}
+#| echo: false
+modelo_full <- lm(precio ~ bateria + memoria + potencia + camara, data = data)
+data1 <- data |> filter(os_categoria == "Android")
+data2 <- data |> filter(os_categoria == "iOS")
+modelo_android <- lm(precio ~ bateria + memoria + potencia + camara, data = data1)
+modelo_ios <- lm(precio ~ bateria + memoria + potencia + camara, data = data2)
+```
+
+```{r}
+#| echo: false
+screenreg(list("Modelo Completo" = modelo_full, "Modelo Android" = modelo_android, "Modelo iOS" = modelo_ios))
+```
+
+El análisis de regresión lineal que hemos realizado permite explorar cómo las características técnicas de los celulares, tales como la batería, memoria, potencia y cámara, impactan en su precio. Hemos ajustado tres modelos de regresión lineal: uno para el conjunto completo de datos (Modelo Completo), otro solo para dispositivos con sistema operativo Android (Modelo Android), y uno más para dispositivos con iOS (Modelo iOS). A continuación, se detallan los hallazgos principales de cada uno de estos modelos.
+
+En el Modelo Completo, observamos que la memoria es el factor que más contribuye al precio, con un coeficiente positivo de 1906.6, lo que indica que, en promedio, un aumento en la memoria está asociado a un incremento significativo en el precio del dispositivo. Por otro lado, la batería muestra un efecto negativo (-150.55), al igual que la potencia (-726.48), aunque el impacto de la potencia no es estadísticamente significativo. La cámara tampoco muestra un efecto significativo sobre el precio. El R\^2 ajustado para este modelo es de 0.55, lo cual indica que aproximadamente el 55% de la variabilidad en el precio puede ser explicada por estas características.
+
+En el Modelo Android, encontramos una tendencia similar. La memoria sigue siendo el predictor más fuerte, con un coeficiente de 1899.25. La batería, por otro lado, presenta un efecto negativo aún más pronunciado (-340.97), y también es estadísticamente significativo. La potencia y la cámara no presentan efectos significativos sobre el precio en este modelo. Este modelo tiene un R\^2 ajustado de 0.60, sugiriendo un buen nivel de ajuste para explicar la variabilidad en el precio de dispositivos Android.
+
+Por último, en el Modelo iOS, las características que influyen en el precio presentan algunas diferencias notables. La memoria sigue siendo un factor positivo y significativo (1140.03), pero la potencia muestra un efecto positivo y significativo en este caso (11425.30), en contraste con los modelos anteriores. La batería, en cambio, tiene un efecto positivo (173.19), aunque menos relevante en comparación con la potencia y la memoria. La cámara no tiene un efecto significativo en el precio de los dispositivos iOS. Este modelo tiene un R\^2 ajustado de 0.73, lo que indica un mejor ajuste en comparación con los modelos anteriores.
+
+En conclusión, los tres modelos sugieren que la memoria es consistentemente un factor importante para el precio de los dispositivos móviles. Sin embargo, las diferencias entre Android y iOS, especialmente en cuanto a la relevancia de la potencia en los dispositivos iOS, sugieren que los consumidores de iOS valoran características específicas de manera diferente.
+
+### Análisis descriptivos preliminar.
+
+**1.1) Imprima las estadísticas descriptivas de las 3 marcas de celulares que tengan el mayor precio promedio (considerando un mismo celular en diferentes tiendas)**
+
+Para obtener los celulares más vendidos, debimos crear la variable marca a partir de la variable equipo. Esto se realizo obteniendo la primera frase de esta variable, obteniendo todas las marcas.
+
+Los resultados nos indican que Apple es la que vende celulares más caros, seguidos de Samsung y Huawei.
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+marcas <- data |> 
+  group_by(marca) |> 
+  summarise(promedio = comma(round(mean(precio, na.rm = TRUE)), accuracy = 1)) |> 
+  arrange(desc(promedio)) |> 
+  slice_head(n = 3); marcas
+```
+
+Un gráfico de barra nos invita a ver en perspectiva los precios según las diferentes marcas.
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+
+data_promedio <- data |> 
+  group_by(marca) |> 
+  summarise(precio_promedio = mean(precio, na.rm = TRUE)) |> 
+  arrange(desc(precio_promedio))
+
+# Crear el gráfico
+ggplot(data = data_promedio, aes(x = reorder(marca, -precio_promedio), y = precio_promedio, fill = marca)) +
+  geom_bar(stat = "identity") +
+  geom_text(aes(label = format(round(precio_promedio), big.mark = ",")), 
+            vjust = -0.5,  # Ajustar la posición vertical de las etiquetas
+            size = 2) +  # Tamaño de la etiqueta
+  scale_y_continuous(labels = scales::comma) +  # Usar coma para miles
+  labs(
+    title = "Precio Promedio por Marca",
+    x = "Marca", 
+    y = "Precio Promedio",
+    fill = "Marca"
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(
+    legend.position = "none",  # Ocultar la leyenda para mayor claridad
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    plot.title = element_text(hjust = 0.5, size = 14, face = "bold")
+  )
+```
+
+**1.2) Considerando todos los celulares que son vendidos por las tiendas Hites y Líder en conjunto (es decir, un mismo celular por las dos tiendas), determine y muestre qué tienda en promedio es la que vende los celulares más caros y cual es la que los vende más barato.**
+
+Para este análisis nos quedamos con los celulares que tenían un nombre exactamente igual en la base de datos obtenidas, obviando otras características como el color, la versión (Pro o normal) y la memoria, los que van variando por modelo.
+
+En el gráfico número se aprecia que la tiende Líder vende 4 celulares más caro en comparación con Hites, mientras que Hites vende 5 celulares más caro es con comparación con Líder.
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+
+data_promedio <- data |> 
+  # Filtramos para incluir solo las tiendas Hites y Líder
+  filter(tienda %in% c("Hites", "Lider")) |> 
+  # Agrupamos por equipo y verificamos que el equipo esté en ambas tiendas
+  group_by(equipo) |> 
+  filter(n_distinct(tienda) == 2) |> 
+    mutate(equipo = str_remove(equipo, "\\s*\\(.*\\)")) |> 
+  # Agrupamos nuevamente por equipo y tienda para calcular el promedio de precio por equipo en ambas tiendas
+  group_by(tienda, equipo) |> 
+  summarise(precio_promedio = mean(precio, na.rm = TRUE), .groups = "drop") |> 
+  ungroup()
+
+p <- ggplot(data = data_promedio, aes(x = tienda, y = precio_promedio, fill = tienda)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  geom_text(aes(label = format(precio_promedio, big.mark = ",")), 
+            position = position_dodge(width = 0.9), 
+            vjust = -0.5,  # Ajustar la posición vertical de las etiquetas
+            size = 3.5) +  # Tamaño de la etiqueta
+  scale_y_continuous(labels = comma) +  # Eliminar notación científica y usar coma para miles
+  scale_fill_manual(values = c("Hites" = "dodgerblue", "Lider" = "tomato")) +
+  labs(
+    title = "Comparación de Precios Promedio por Equipo y Tienda",
+    x = "Tienda", y = "Precio Promedio",
+    fill = "Tienda"
+  ) +
+  facet_wrap(~ equipo, ncol = 5, scales = "free_y") +
+  theme_minimal(base_size = 12) +
+  theme(
+    legend.position = "top",
+    legend.title = element_text(size = 10),
+    legend.text = element_text(size = 9),
+    strip.text = element_text(size = 9, face = "bold"), # Estilo para los títulos de facetas
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    plot.title = element_text(hjust = 0.5, size = 14, face = "bold"),
+    panel.spacing = unit(1.2, "lines")  # Mayor espacio entre facetas
+  )
+```
+
+![Relación Precio y Batería](images/comparacion_precios.png){fig-align="center" width="550"}
+
+**1.3) Muestre cuántos celulares de diferentes marcas hay disponibles en el mercado (sin considerar celulares repetidos, es decir, sin considerar un mismo celular vendido por dos tiendas diferentes). Además, con esta información, construya un gráfico de barras.**
+
+```{r}
+#| echo: false
+celulares_unicos <- data %>%
+  distinct(equipo, .keep_all = TRUE)  # Mantener solo los registros únicos por modelo de celular
+
+# Contar el número de celulares únicos por marca
+conteo_marcas <- celulares_unicos %>%
+  count(marca = str_extract(equipo, "^[A-Za-z]+"))  # Extraer la marca del nombre del equipo
+```
+
+Un análisis del mercado nos indica que hay 166 celulares únicos, que desglosan de diferentes maneras según las marcas.
+
+```{r}
+#| echo: false
+conteo_marcas
+```
+
+El gráfico de barra nos indica Samsung, Xiami y Apple dominan el mercado (respectivamente).
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+
+celulares_unicos <- data %>%
+  distinct(equipo, .keep_all = TRUE)  # Mantener solo los registros únicos por modelo de celular
+
+# Contar el número de celulares únicos por marca
+conteo_marcas <- celulares_unicos %>%
+  count(marca = str_extract(equipo, "^[A-Za-z]+"))  # Extraer la marca del nombre del equipo
+
+# Crear el gráfico de barras
+ggplot(conteo_marcas, aes(x = reorder(marca, n), y = n, fill = marca)) +
+  geom_bar(stat = "identity") +
+  geom_text(aes(label = format(n, big.mark = ",")), 
+            position = position_dodge(width = 0.9), 
+            vjust = 0.9,  # Ajustar la posición vertical de las etiquetas
+            size = 3.5) +  # Tamaño de la etiqueta
+  labs(
+    title = "Cantidad de Celulares Disponibles por Marca (Modelos Únicos)",
+    x = "Marca",
+    y = "Cantidad de Modelos Únicos",
+    fill = "Marca"
+  ) +
+  theme(
+    legend.position = NULL,
+    legend.title = element_text(size = 7),
+    legend.text = element_text(size = 9),
+    strip.text = element_text(size = 9, face = "bold"), # Estilo para los títulos de facetas
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    plot.title = element_text(hjust = 0.5, size = 10, face = "bold"),
+    panel.spacing = unit(1.2, "lines")  # Mayor espacio entre facetas
+  ) +
+  coord_flip()  # Para que las marcas se muestren en vertical
+```
